@@ -1,0 +1,24 @@
+{
+    "name": "bpnpdl/easy-locale",
+    "description": "Easy localization for Laravel",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bpnpdl\\EasyLocale\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

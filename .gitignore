@@ -1,0 +1,15 @@
+# Composer
+/vendor/
+/composer.lock
+
+# IDE
+/.idea/
+/.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests / coverage
+/.phpunit.result.cache
+/.coverage/
