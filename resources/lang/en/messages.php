@@ -2,8 +2,8 @@
 
 return [
     'welcome' => 'Welcome',
-    'hello'   => 'Hello :name',
-    'home'    => 'Home',
-    'about'   => 'About',
+    'hello' => 'Hello :name',
+    'home' => 'Home',
+    'about' => 'About',
     'contact' => 'Contact',
 ];

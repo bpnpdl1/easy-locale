@@ -2,8 +2,9 @@
 
 namespace Bpnpdl\EasyLocale;
 
+use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router;
 
 class EasyLocaleServiceProvider extends ServiceProvider
 {
@@ -17,16 +18,17 @@ class EasyLocaleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $default = config('easy-locale.default', 'en');
+        $locales = array_keys((array) config('easy-locale.locales', []));
+        $firstSegment = request()->segment(1);
+        app()->setLocale($firstSegment && in_array($firstSegment, $locales, true) ? $firstSegment : $default);
+
         // Register package translations under the 'easy-locale' namespace
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'easy-locale');
 
         // Optionally register package views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'easy-locale');
 
-        // Push locale-detection middleware into the 'web' group
-        $this->app->afterResolving('router', function (Router $router) {
-            $router->pushMiddlewareToGroup('web', \Bpnpdl\EasyLocale\Middleware\DetectLocaleFromPrefix::class);
-        });
 
         $this->publishes([
             __DIR__ . '/Config/easy-locale.php' => config_path('easy-locale.php'),
@@ -39,5 +41,11 @@ class EasyLocaleServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../resources/views' => resource_path('views/vendor/easy-locale'),
         ], 'views');
+
+        // Load package routes
+        $routesPath = __DIR__ . '/../routes/web.php';
+        if (file_exists($routesPath)) {
+            $this->loadRoutesFrom($routesPath);
+        }
     }
 }

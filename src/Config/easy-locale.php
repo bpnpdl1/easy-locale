@@ -3,8 +3,8 @@
 return [
     'locales' => [
         'en' => 'English',
-        'ne' => 'नेपाली',
+        'np' => 'नेपाली',
     ],
 
-    'default' => 'ne',
+    'default' => 'en',
 ];
