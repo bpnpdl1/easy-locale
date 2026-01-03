@@ -1,6 +1,6 @@
 # Easy Locale for Laravel
 
-Locale-aware routing and links with “no prefix for default” semantics. If your default locale is `en`, URLs look like `/about`; other locales are prefixed, e.g. `/np/about`.
+Easy Locale adds locale-aware routing and link generation to Laravel with a clear rule: the default locale has no URL prefix, while non-default locales are prefixed as the first URL segment.
 
 ## Features
 
@@ -15,7 +15,33 @@ Locale-aware routing and links with “no prefix for default” semantics. If yo
 - PHP 8.2+
 - Laravel 12 (Illuminate Support ^12.0)
 
-## Installation
+## Installation (Composer)
+
+From Packagist:
+
+```bash
+composer require bpnpdl/easy-locale
+```
+
+From VCS (GitHub) for bleeding-edge development:
+
+Add to your app `composer.json`:
+
+```json
+{
+  "repositories": [
+    { "type": "vcs", "url": "https://github.com/bpnpdl1/easy-locale" }
+  ]
+}
+```
+
+Then install:
+
+```bash
+composer require bpnpdl/easy-locale:dev-develop
+```
+
+The service provider is auto-discovered by Laravel when installed via Composer.
 
 ### Editable install in a Laravel app (GitHub clone)
 
@@ -201,6 +227,21 @@ When you build links using named routes, the current locale determines the URL:
 - Services: `ChangeLanguageService`, `GroupLocaleRouteService`
 - Routes: `routes/web.php` (switch endpoint)
 
+## Contributing
+
+Contributions are welcome! Please:
+- Fork the repo and create a feature branch: `feature/your-change`.
+- Follow PSR-12 and Laravel conventions.
+- Include tests or usage examples when relevant.
+- Open a PR against the active development branch.
+
+For a step-by-step editable workflow inside a Laravel app (GitHub clone + PSR-4), see `contribution.md`.
+
 ## License
 
-MIT
+This package is open-sourced software licensed under the MIT license.
+
+## Contact
+
+- Email: bipinpaudel6774@gmail.com
+- LinkedIn: https://www.linkedin.com/in/bpnpdl/
