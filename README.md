@@ -23,24 +23,6 @@ From Packagist:
 composer require bpnpdl/easy-locale
 ```
 
-From VCS (GitHub) for bleeding-edge development:
-
-Add to your app `composer.json`:
-
-```json
-{
-  "repositories": [
-    { "type": "vcs", "url": "https://github.com/bpnpdl1/easy-locale" }
-  ]
-}
-```
-
-Then install:
-
-```bash
-composer require bpnpdl/easy-locale:dev-develop
-```
-
 The service provider is auto-discovered by Laravel when installed via Composer.
 
 ### Editable install in a Laravel app (GitHub clone)
@@ -203,12 +185,12 @@ In your app views you can use normal Laravel translation files (e.g., `lang/en/*
 
 ## Example: links
 
-When you build links using named routes, the current locale determines the URL:
+When you build links using named routes, the current locale determines the URL. Use your app's translation labels for link text:
 
 ```blade
-<a href="{{ route('home') }}">Home</a>
-<a href="{{ route('about') }}">About</a>
-<a href="{{ route('contact') }}">Contact</a>
+<a href="{{ route('home') }}">{{ __('pages.home') }}</a>
+<a href="{{ route('about') }}">{{ __('pages.about') }}</a>
+<a href="{{ route('contact') }}">{{ __('pages.contact') }}</a>
 ```
 
 - Default locale `en`: `/`, `/about`, `/contact`
@@ -230,6 +212,7 @@ When you build links using named routes, the current locale determines the URL:
 ## Contributing
 
 Contributions are welcome! Please:
+
 - Fork the repo and create a feature branch: `feature/your-change`.
 - Follow PSR-12 and Laravel conventions.
 - Include tests or usage examples when relevant.
