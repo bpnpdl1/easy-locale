@@ -17,6 +17,53 @@ Locale-aware routing and links with “no prefix for default” semantics. If yo
 
 ## Installation
 
+### Editable install in a Laravel app (GitHub clone)
+
+If you want to modify this package locally and push changes back to GitHub while using it inside your Laravel app, clone the repo into your app and wire PSR-4 autoload:
+
+```powershell
+mkdir -Force packages\bpnpdl
+git clone https://github.com/bpnpdl1/easy-locale.git packages\bpnpdl\easy-locale
+```
+
+In your app `composer.json` add:
+
+```json
+{
+  "autoload": {
+    "psr-4": {
+      "Bpnpdl\\EasyLocale\\": "packages/bpnpdl/easy-locale/src/"
+    }
+  }
+}
+```
+
+Register the provider in `bootstrap/providers.php`:
+
+```php
+return [
+    // ...
+    Bpnpdl\EasyLocale\EasyLocaleServiceProvider::class,
+];
+```
+
+Then rebuild autoload:
+
+```powershell
+composer dump-autoload -o
+php artisan route:list
+```
+
+Edit files under `packages/bpnpdl/easy-locale`, commit, and push:
+
+```powershell
+cd packages\bpnpdl\easy-locale
+git checkout -b feature/readme-update
+git add -A
+git commit -m "docs: update README"
+git push -u origin feature/readme-update
+```
+
 Install via Composer — either as a local path repository or from your VCS:
 
 1. Local path (mono-repo)
