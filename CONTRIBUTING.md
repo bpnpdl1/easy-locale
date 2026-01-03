@@ -24,13 +24,9 @@ Thank you for considering contributing to Easy Locale. This guide explains how t
 
 ## Local Development & Testing
 
-To test the package inside a Laravel app while you develop:
+To test the package while you develop, wire your local clone into a Laravel app via PSR-4:
 
-- Add the package via Packagist (recommended):
-  ```powershell
-  composer require bpnpdl/easy-locale
-  ```
-- Or wire a local clone via PSR-4 in your app’s `composer.json` (editable workflow):
+- In your app’s `composer.json`, map the namespace:
   ```json
   {
     "autoload": {
@@ -40,18 +36,18 @@ To test the package inside a Laravel app while you develop:
     }
   }
   ```
-- Register provider in `bootstrap/providers.php` of your app:
+- Register the provider in `bootstrap/providers.php` of your app:
   ```php
   return [
       Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider::class,
   ];
   ```
-- Rebuild autoload and smoke test:
+- Rebuild autoload and verify routes:
   ```powershell
   composer dump-autoload -o
   php artisan route:list
   ```
-- Publish optional assets:
+- Optionally publish assets in the host app:
   ```powershell
   php artisan vendor:publish --provider="Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider" --tag=config
   php artisan vendor:publish --provider="Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider" --tag=lang

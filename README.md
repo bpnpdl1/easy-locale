@@ -1,14 +1,19 @@
 # Easy Locale for Laravel
 
-Easy Locale adds locale-aware routing and link generation to Laravel with a clear rule: the default locale has no URL prefix, while non-default locales are prefixed as the first URL segment.
+Easy Locale adds locale-aware routing and link generation to Laravel with a simple, predictable rule:
+
+- The default locale has no URL prefix (clean URLs).
+- Non-default locales are prefixed as the first URL segment (e.g., `/np/about`).
+
+This helps you ship a single set of routes while presenting localized URLs only when needed.
 
 ## Features
 
-- Default locale without a URL prefix (e.g., `en` → `/about`)
-- Other locales use a first URL segment (e.g., `np` → `/np/about`)
-- Simple locale switch route: `GET /locale/{locale}` redirects to the proper URL
-- Lightweight service to group your app routes under the current locale
-- Publishable views (language switcher) and translations
+- Clean URLs for your default locale (e.g., `en` → `/about`).
+- Prefixed URLs for non-default locales (e.g., `np` → `/np/about`).
+- Lightweight helper to group your routes once and let the package handle locale prefixes.
+- Built-in locale switch endpoint to redirect correctly when changing languages.
+- Optional, publishable Blade switcher UI and translation stubs.
 
 ## Requirements
 
@@ -17,100 +22,13 @@ Easy Locale adds locale-aware routing and link generation to Laravel with a clea
 
 ## Installation (Composer)
 
-From Packagist:
+Install from Packagist:
 
 ```bash
 composer require bpnpdl/easy-locale
 ```
 
-The service provider is auto-discovered by Laravel when installed via Composer.
-
-### Editable install in a Laravel app (GitHub clone)
-
-If you want to modify this package locally and push changes back to GitHub while using it inside your Laravel app, clone the repo into your app and wire PSR-4 autoload:
-
-```powershell
-mkdir -Force packages\bpnpdl
-git clone https://github.com/bpnpdl1/easy-locale.git packages\bpnpdl\easy-locale
-```
-
-In your app `composer.json` add:
-
-```json
-{
-  "autoload": {
-    "psr-4": {
-      "Bpnpdl\\EasyLocale\\": "packages/bpnpdl/easy-locale/src/"
-    }
-  }
-}
-```
-
-Register the provider in `bootstrap/providers.php`:
-
-```php
-return [
-    // ...
-    Bpnpdl\EasyLocale\EasyLocaleServiceProvider::class,
-];
-```
-
-Then rebuild autoload:
-
-```powershell
-composer dump-autoload -o
-php artisan route:list
-```
-
-Edit files under `packages/bpnpdl/easy-locale`, commit, and push:
-
-```powershell
-cd packages\bpnpdl\easy-locale
-git checkout -b feature/readme-update
-git add -A
-git commit -m "docs: update README"
-git push -u origin feature/readme-update
-```
-
-Install via Composer — either as a local path repository or from your VCS:
-
-1. Local path (mono-repo)
-
-Add to your app `composer.json`:
-
-```json
-{
-  "repositories": [
-    {
-      "type": "path",
-      "url": "packages/bpnpdl/easy-locale",
-      "options": { "symlink": true }
-    }
-  ]
-}
-```
-
-Then require the package:
-
-```bash
-composer require bpnpdl/easy-locale:@dev
-```
-
-2. VCS (GitHub)
-
-```json
-{
-  "repositories": [
-    { "type": "vcs", "url": "https://github.com/bpnpdl1/easy-locale" }
-  ]
-}
-```
-
-```bash
-composer require bpnpdl/easy-locale:dev-develop
-```
-
-The service provider is auto-discovered.
+Laravel will auto-discover the service provider.
 
 ## Publish assets
 
@@ -139,7 +57,7 @@ return [
 
 ## Routing: group by current locale
 
-Use the provided service to group your frontend routes. Default locale → no prefix; others → `/{locale}` prefix.
+Group your frontend routes once. Easy Locale mounts them with no prefix for the default locale and with `/{locale}` for others:
 
 ```php
 use Bpnpdl\EasyLocale\Services\GroupLocaleRouteService;
@@ -154,6 +72,7 @@ GroupLocaleRouteService::setLocaleRoutePrefix($frontend);
 ```
 
 Behind the scenes, the package sets `app()->getLocale()` from the first URL segment if it matches a configured locale; otherwise it uses your configured default.
+This means you avoid duplicating route definitions while still serving localized paths.
 
 ## Locale switching
 
@@ -181,6 +100,8 @@ If you prefer a ready-made UI, include the switcher view:
 - Translations can be published to `lang/vendor/easy-locale`.
 - Views can be published to `resources/views/vendor/easy-locale`.
 
+Use your own app translation files (e.g., `lang/en/pages.php`, `lang/np/pages.php`) for labels and navigation. The package does not override your app’s translation loading; it focuses on routing and URL shape.
+
 In your app views you can use normal Laravel translation files (e.g., `lang/en/*.php`, `lang/np/*.php`). The package itself does not override your app’s translation loading.
 
 ## Example: links
@@ -202,27 +123,13 @@ When you build links using named routes, the current locale determines the URL. 
 - Switching to the default locale still shows a prefix? Use the `easy-locale.switch-language` route; it removes the prefix for the default locale.
 - Added a new locale but URLs don’t work? Add the locale code to `config('easy-locale.locales')`, clear caches, and verify your route group is using `GroupLocaleRouteService`.
 
-## Development
-
-- PSR-4: `Bpnpdl\EasyLocale\` → `src/`
-- Provider: `Bpnpdl\EasyLocale\EasyLocaleServiceProvider`
-- Services: `ChangeLanguageService`, `GroupLocaleRouteService`
-- Routes: `routes/web.php` (switch endpoint)
-
 ## Contributing
 
-Contributions are welcome! Please:
-
-- Fork the repo and create a feature branch: `feature/your-change`.
-- Follow PSR-12 and Laravel conventions.
-- Include tests or usage examples when relevant.
-- Open a PR against the active development branch.
-
-For a step-by-step editable workflow inside a Laravel app (GitHub clone + PSR-4), see `contribution.md`.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development workflow, coding standards, and PR process.
 
 ## License
 
-This package is open-sourced software licensed under the MIT license.
+MIT — see [LICENSE.md](LICENSE.md).
 
 ## Contact
 
