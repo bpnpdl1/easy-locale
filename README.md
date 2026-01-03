@@ -1,14 +1,14 @@
 # Easy Locale for Laravel
 
-A tiny Laravel package that sets the application locale based on the first URL segment. It supports any configured locale (e.g., `ne`, `en`, `hi`, `es`). The default is Nepali (`ne`).
+Locale-aware routing and links with “no prefix for default” semantics. If your default locale is `en`, URLs look like `/about`; other locales are prefixed, e.g. `/np/about`.
 
 ## Features
 
-- Default locale from config (`ne` by default)
-- Detects locale from the first URL segment: `/` → default locale, `/{locale}` → that locale
-- Normalizes requests so a single route table works (no duplicate `/en` routes)
-- Automatically prefixes generated URLs (`route()`, `url()`) with `/{locale}` when not default
-- Ships with basic translation files (`en` and `ne`) under the `easy-locale` namespace
+- Default locale without a URL prefix (e.g., `en` → `/about`)
+- Other locales use a first URL segment (e.g., `np` → `/np/about`)
+- Simple locale switch route: `GET /locale/{locale}` redirects to the proper URL
+- Lightweight service to group your app routes under the current locale
+- Publishable views (language switcher) and translations
 
 ## Requirements
 
@@ -17,91 +17,142 @@ A tiny Laravel package that sets the application locale based on the first URL s
 
 ## Installation
 
-Available on Packagist: `bpnpdl/easy-locale`
+Install via Composer — either as a local path repository or from your VCS:
 
-```
-composer require bpnpdl/easy-locale
+1. Local path (mono-repo)
+
+Add to your app `composer.json`:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "path",
+      "url": "packages/bpnpdl/easy-locale",
+      "options": { "symlink": true }
+    }
+  ]
+}
 ```
 
-The service provider is auto-discovered. Optionally publish config and resources:
+Then require the package:
 
+```bash
+composer require bpnpdl/easy-locale:@dev
 ```
-php artisan vendor:publish --provider="Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider" --tag=config
-php artisan vendor:publish --provider="Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider" --tag=lang
-php artisan vendor:publish --provider="Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider" --tag=views
+
+2. VCS (GitHub)
+
+```json
+{
+  "repositories": [
+    { "type": "vcs", "url": "https://github.com/bpnpdl1/easy-locale" }
+  ]
+}
+```
+
+```bash
+composer require bpnpdl/easy-locale:dev-develop
+```
+
+The service provider is auto-discovered.
+
+## Publish assets
+
+```bash
+php artisan vendor:publish --provider="Bpnpdl\EasyLocale\EasyLocaleServiceProvider" --tag=config
+php artisan vendor:publish --provider="Bpnpdl\EasyLocale\EasyLocaleServiceProvider" --tag=lang
+php artisan vendor:publish --provider="Bpnpdl\EasyLocale\EasyLocaleServiceProvider" --tag=views
 ```
 
 ## Configuration
 
-Published to `config/easy-locale.php`:
+`config/easy-locale.php`:
 
 ```php
 return [
-    'locales' => [
-        'en' => 'English',
-        'ne' => 'नेपाली',
-        // add more like:
-        // 'hi' => 'Hindi',
-        // 'es' => 'Español',
-    ],
-    'default' => 'ne', // default app locale
+        'locales' => [
+                'en' => 'English',
+                'np' => 'नेपाली',
+                // add more like:
+                // 'hi' => 'Hindi',
+                // 'es' => 'Español',
+        ],
+        'default' => 'en', // default app locale; has no URL prefix
 ];
 ```
 
-## How It Works
+## Routing: group by current locale
 
-- Global middleware `Bpnpdl\\EasyLocale\\Middleware\\NormalizeLocalePrefix` detects the first URL segment; if it matches a configured locale, it sets `App::setLocale($segment)` and strips the segment before routing. This means `/en/dashboard` is routed by the same single route definition as `/dashboard`.
-- The service provider configures `URL::formatPathUsing` so `route()` and `url()` automatically include `/{locale}` when the current locale is not the default.
-
-### Example routes (single set)
+Use the provided service to group your frontend routes. Default locale → no prefix; others → `/{locale}` prefix.
 
 ```php
-Route::get('/', fn () => view('welcome'))->name('home');
-// No need to duplicate with Route::prefix('en')
+use Bpnpdl\EasyLocale\Services\GroupLocaleRouteService;
+
+$frontend = function () {
+        Route::get('/', fn () => view('welcome'))->name('home');
+        Route::get('/about', [PageController::class, 'about'])->name('about');
+        Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+};
+
+GroupLocaleRouteService::setLocaleRoutePrefix($frontend);
 ```
 
-## Usage in Views
+Behind the scenes, the package sets `app()->getLocale()` from the first URL segment if it matches a configured locale; otherwise it uses your configured default.
 
-Use the package translation namespace:
+## Locale switching
+
+The package registers:
+
+- `GET /locale/{locale}` → `easy-locale.switch-language`
+
+Use it to switch languages without breaking URLs. Examples:
 
 ```blade
-{{ __('easy-locale::messages.welcome') }}
+<a href="{{ route('easy-locale.switch-language', 'en') }}">English</a>
+<a href="{{ route('easy-locale.switch-language', 'np') }}">नेपाली</a>
 ```
 
-### Locale-aware links
-
-Links you build with `route()` and `url()` are automatically prefixed when the current locale is not the default:
-
-```php
-route('home');            // "/" or "/en" (or "/{locale}")
-url('/dashboard');        // "/dashboard" or "/en/dashboard"
-```
-
-Alternatively in Blade:
+If you prefer a ready-made UI, include the switcher view:
 
 ```blade
-<a href="@easyLocaleHref('/dashboard')">Dashboard</a>
-{{-- or using the shared prefix --}}
-<a href="{{ $easyLocalePrefix }}/dashboard">Dashboard</a>
+@include('easy-locale::switcher')
+{{-- or if you published views: --}}
+@include('vendor.easy-locale.switcher')
 ```
 
-### Simple Toggle UI
+## Translations and views
+
+- Translations can be published to `lang/vendor/easy-locale`.
+- Views can be published to `resources/views/vendor/easy-locale`.
+
+In your app views you can use normal Laravel translation files (e.g., `lang/en/*.php`, `lang/np/*.php`). The package itself does not override your app’s translation loading.
+
+## Example: links
+
+When you build links using named routes, the current locale determines the URL:
 
 ```blade
-<div class="flex items-center gap-2">
-    <a href="/en" class="px-4 py-2 rounded-md border">English</a>
-    <a href="/" class="px-4 py-2 rounded-md border">नेपाली</a>
-    {{-- or for other locales: --}}
-    <a href="/hi" class="px-4 py-2 rounded-md border">हिन्दी</a>
-    <a href="/es" class="px-4 py-2 rounded-md border">Español</a>
-}</div>
+<a href="{{ route('home') }}">Home</a>
+<a href="{{ route('about') }}">About</a>
+<a href="{{ route('contact') }}">Contact</a>
 ```
+
+- Default locale `en`: `/`, `/about`, `/contact`
+- Locale `np`: `/np`, `/np/about`, `/np/contact`
+
+## Troubleshooting
+
+- Seeing `/en/...` when you expect no prefix? Ensure `default` in `config/easy-locale.php` is set to `en` and that you group routes with `GroupLocaleRouteService`.
+- Switching to the default locale still shows a prefix? Use the `easy-locale.switch-language` route; it removes the prefix for the default locale.
+- Added a new locale but URLs don’t work? Add the locale code to `config('easy-locale.locales')`, clear caches, and verify your route group is using `GroupLocaleRouteService`.
 
 ## Development
 
-- PSR-4 autoload: `Bpnpdl\\EasyLocale\\` → `src/`
-- Provider: `Bpnpdl\\EasyLocale\\EasyLocaleServiceProvider`
-- Middleware: `Bpnpdl\\EasyLocale\\Middleware\\NormalizeLocalePrefix`
+- PSR-4: `Bpnpdl\EasyLocale\` → `src/`
+- Provider: `Bpnpdl\EasyLocale\EasyLocaleServiceProvider`
+- Services: `ChangeLanguageService`, `GroupLocaleRouteService`
+- Routes: `routes/web.php` (switch endpoint)
 
 ## License
 
